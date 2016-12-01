@@ -427,8 +427,13 @@ end
 
 	--设置朝向
 	--	朝向
-	function mt:set_facing(angle)
-		jass.SetUnitFacing(self.handle, angle)
+	--  瞬间转身
+	function mt:set_facing(angle, instant)
+    	if instant then
+        	japi.EXSetUnitFacing(self.handle, angle)
+    	else
+		    jass.SetUnitFacing(self.handle, angle)
+    	end
 		if self._dummy_angle then
 			self._dummy_angle = angle
 		end
@@ -1564,14 +1569,25 @@ local function restriction_akari(unit, flag)
 end
 
 local function restriction_fly(unit, flag)
-	jass.SetUnitPathing(unit.handle, not flag)
+    if flag then
+        japi.EXSetUnitMoveType(unit.handle, 4)
+    else
+    	if unit:has_restriction '幽灵' then
+        	japi.EXSetUnitMoveType(unit.handle, 16)
+		else
+        	japi.EXSetUnitMoveType(unit.handle, 2)
+    	end
+    end
 end
 
-local function restriction_collision(self, flag)
+local function restriction_collision(unit, flag)
+    if unit:has_restriction '飞行' then
+        return
+    end
 	if flag then
-		self:add_ability 'A008'
+        japi.EXSetUnitMoveType(unit.handle, 16)
 	else
-		self:remove_ability 'A008'
+        japi.EXSetUnitMoveType(unit.handle, 2)
 	end
 end
 
@@ -1908,11 +1924,6 @@ function unit.init()
 	for i = 0, 15 do
 		jass.TriggerRegisterPlayerUnitEvent(j_trg, jass.Player(i), jass.EVENT_PLAYER_UNIT_SUMMON, nil)
 	end
-
-	-- 硬直
-	ac.dummy:add_ability 'A00A'
-	-- 禁魔
-	ac.dummy:add_ability 'A00D'
 end
 
 return unit

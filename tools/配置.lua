@@ -1,5 +1,6 @@
 require 'ydwe'
 require 'sys'
+
 if not ydwe then
     return
 end
@@ -8,3 +9,4 @@ local p = sys.process()
 if p:create(nil, ydwe / 'bin' / 'ydweconfig.exe', nil) then
     p:close()
 end
+
